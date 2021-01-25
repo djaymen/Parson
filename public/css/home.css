@@ -1,0 +1,21 @@
+body{
+    /*background-image: url("/img/bg.jpg");*/
+    background-size: cover;
+    object-fit: cover;
+    background-position: 0 56px;
+    background: var(--linear_bg_col_welcome);  /* fallback for old browsers */
+}
+
+.welcome_msg
+{
+    /*background-color: var(--overlay_bg_dark_col);*/
+    color: #343232;
+    border-radius: 4px;
+    font-family: "Comic Sans MS", sans-serif;
+    font-size: larger;
+    margin: 14% auto;
+}
+
+.welcome_img{
+    margin: 30px auto ;
+}

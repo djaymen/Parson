@@ -1,0 +1,62 @@
+:root{
+    --col-navbar : rgba(0, 0, 0, 0.92);
+    --main_bg_color: rgb(170, 52, 52);
+    --navbar_col:rgba(8, 7, 7, 0.911);
+    --hover_bg_col:rgba(63, 218, 172, 0.911);
+    --text_col:rgba(255, 255, 255, 0.911);
+    --text_hover_col:rgb(105, 253, 142);
+    --overlay_bg_col:rgba(146, 146, 146, 0.534);
+    --overlay_bg_dark_col: rgba(32, 29, 29, 0.67);
+    --overlay_fg_col:rgba(233, 224, 224, 0.534);
+    --linear_bg_col : linear-gradient(to right, #F2C94C, #F2994A);
+    --linear_bg_col_welcome: linear-gradient(to right, #e761a4, #ff7209);
+    --linear_bg_col_2: linear-gradient(to right, #67b26f, #4ca2cd);
+
+
+}
+
+
+body{
+    margin: 0;
+    padding: 0;
+}
+
+.parson_home{
+    font-family: "Comic Sans MS", sans-serif;
+    font-size: 24px;
+}
+
+
+.navbar{
+    background-color: var(--col-navbar);
+}
+.navbar-userImg {
+
+    width: 50px;
+    height: 50px;
+    filter: contrast(1.1);
+}
+
+.navbar-userImg:hover{
+    transform: scale(1.2);
+    filter: contrast(1.5);
+}
+
+.userImg{
+
+    width: 100px;
+    height: 100px;
+    border-radius: 10px;
+    margin: 2px 8px;
+    object-fit: cover;
+
+}
+
+.sexeImg{
+
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    margin: 5px 0;
+    object-fit: cover;
+}

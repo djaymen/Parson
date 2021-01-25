@@ -1,0 +1,67 @@
+{% extends 'base.html.twig' %}
+
+{% block title %} Ajouter un Exercice {% endblock %}
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/courses.css') }}">
+{% endblock %}
+{% block body_content %}
+
+
+
+
+    <div class="mt-3 col-lg-6 col-md-8 col-sm-12 mx-auto text-center">
+            <div class="body-container">
+                <div class="row mt-2 course-img-container">
+                    <img src="{{ asset('img/course.png') }}" class="course-img" alt="">
+                </div>
+        {{ form_start(courseForm) }}
+{#        {{ form_widget(courseForm) }}#}
+        {{ form_row(courseForm.title) }}
+        {{ form_row(courseForm.question) }}
+        {{ form_row(courseForm.type) }}
+{#        <ul id="solution-list">#}
+{#            <button type="button"#}
+{#                    class="add-instruction btn btn-info">#}
+{#                <span><i class="fas fa-plus-circle"></i>#}
+{#                </span> instruction </button>#}
+{#        </ul>#}
+
+        <button type="submit" class="btn btn-dark btn-lg">
+            Valider
+        </button>
+        {{ form_end(courseForm) }}
+        </div>
+    </div>
+{#    {{  include('course/_form.html.twig',{#}
+{#        title_text: 'Lancez votre nouveau exercice !',#}
+{#        btn_text :  'Ajouter'#}
+{#    }) }}#}
+
+{% endblock %}
+
+
+{% block javascripts %}
+    {{ parent() }}
+
+    <script>
+        $(document).ready(function () {
+            $('.add-instruction').click(function (e) {
+                var list = $('.modal-body');
+                $('.modal').modal();
+
+
+                newInstruction = "<input type=\"text\" placeholder=\"à vous...\"\n" +
+                    "  class=\"form-control mt-2\">";
+
+                var solutionList=$('#solution-list');
+                var li= "<li class='my-1'>"+newInstruction.select(input)+" </li>";
+                solutionList.append(li);
+
+                list.append(newInstruction);
+                console.log(list);
+
+            });
+        });
+    </script>
+{% endblock %}

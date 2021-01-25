@@ -1,0 +1,145 @@
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>{% block title %}Welcome!{% endblock %}</title>
+
+        {% block stylesheets %}
+            <script src="https://kit.fontawesome.com/00eef3ac9c.js" crossorigin="anonymous"></script>
+            <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+            <link rel="stylesheet" href="{{ asset('css/main.css') }}">
+        {% endblock %}
+
+    </head>
+    <body>
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        {% if is_granted('ROLE_ADMIN') %}
+            <a class="navbar-brand text-warning ml-4 parson_home" href="{{ path('parson_home') }}"><i class="fas fa-graduation-cap"> </i> ParSon  <i class="fas fa-user-shield" style="color: #94ff67"></i>
+            </a>
+        {% else %}
+            <a class="navbar-brand text-warning ml-4 parson_home" href="{{ path('parson_home') }}"><i class="fas fa-graduation-cap"> </i> ParSon</a>
+        {% endif %}
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+
+                {% if is_granted('ROLE_ADMIN') %}
+                    <li class="nav-item mx-auto">
+                        <a class="nav-link" href="{{ path('user_list') }}"> <i class="fas fa-users-cog"></i> Utilisateurs</a>
+                    </li>
+                {% endif %}
+                {% if is_granted('ROLE_USER') %}
+                  <li class="nav-item dropdown mx-auto">
+                    <a class="nav-link dropdown-toggle" href="#" id="formation" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="fas fa-chalkboard-teacher"></i> Formations
+                    </a>
+                    <div class="dropdown-menu" role="menu" aria-labelledby="formation">
+                        {% if is_granted('ROLE_ENS') %}
+                            <a class="dropdown-item" href="{{ path('new_course') }}"><i class="fas fa-plus"></i> Ajouter un cours</a>
+                        {% endif %}
+                        <a class="dropdown-item" href="{{ path('courses') }}"><i class="fas fa-stream"></i> Tous les cours</a>
+                        <div class="dropdown-divider"></div>
+                        {% if is_granted('ROLE_ENS') %}
+                            <a class="dropdown-item" href="{{ path('my_created_courses') }}"><i class="fas fa-award"></i> Mes Cours Crées</a>
+                        {% endif %}
+                    </div>
+                </li>
+                {% endif %}
+                {% if is_granted('ROLE_ENS') %}
+                    <li class="nav-item mx-auto">
+                        <a class="nav-link" href="{{ path('ens_results') }}"> <i class="fas fa-poll"></i> Résultats</a>
+                    </li>
+                {% endif %}
+
+                {% if is_granted('ROLE_ADMIN') %}
+                    <li class="nav-item mx-auto">
+                        <a class="nav-link" href="{{ path('admin_results') }}"> <i class="far fa-chart-bar"></i> stats</a>
+                    </li>
+                {% endif %}
+
+
+{#                <li class="nav-item mx-auto">#}
+{#                    <a class="nav-link" href="#"> <i class="fas fa-address-book"></i> Contact</a>#}
+{#                </li>#}
+            </ul>
+
+            <ul class="navbar-nav my-2 my-lg-0">
+                {% if is_granted('ROLE_USER') %}
+                    <li class="nav-item dropdown mx-auto">
+                        {% set imgSrc=app.user.imgUrl ? asset(app.user.imgUrl) : asset('img/profil_default_male.png')  %}
+                        <a class="nav-link dropdown-toggle" href="{{ path('user_profile',{'id':1}) }}" id="compte" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <img class="navbar-userImg rounded-circle mr-2" src="{{ imgSrc }}" alt=""> {{ app.user.fullName}}
+                        </a>
+                        <div class="dropdown-menu col-lg-12 px-3" role="menu" aria-labelledby="compte">
+                            <a class="dropdown-item" href="{{ path('user_profile',{'id':app.user.id}) }}"><i class="fas fa-address-card"></i>  Mon profil</a>
+                            <a class="dropdown-item" href="{{ path('my_courses') }}"><i class="fas fa-award"></i> Mes cours</a>
+                            <a class="dropdown-item" href="{{ path('my_marks') }}"><i class="fas fa-poll"></i> Mes notes</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="btn btn-outline-danger w-100" href="{{path('app_logout')}}"><i class="fas fa-power-off"></i> Déconnexion</a>
+                        </div>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a href="{{ path('app_register') }}" class="btn btn-outline-warning  mr-lg-2 col-sm-12"> Inscription </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ path('app_login') }}" class="btn btn-outline-light ml-lg-2 my-2 my-sm-0 col-sm-12"> Connexion</a>
+                    </li>
+                {% endif %}
+            </ul>
+
+        </div>
+    </nav>
+
+
+        {% for message in app.session.flashBag.get('success') %}
+            <div class="alert alert-success">
+                {{ message }}
+            </div>
+        {% endfor %}
+
+        {% block body %}
+
+            <div class="container">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="">
+                            {% block body_content %} {% endblock %}
+                        </div>
+                        <hr>
+
+                    </div>
+                </div>
+            </div>
+            <!-- FOOTER -->
+            <hr>
+            <footer class="text-center my-1">
+                <p>&copy; 2020 Université Paris Diderot, Benamara Abdelkader & Djelid Aymen </p>
+            </footer>
+
+        {% endblock %}
+        {% block javascripts %}
+{#            <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.2/jquery.min.js" type="text/javascript"></script>#}
+            <script
+                    src="https://code.jquery.com/jquery-3.5.1.js"
+                    integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc="
+                    crossorigin="anonymous"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+            <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+            <script>
+                $('.custom-file-input').on('change',function (event) {
+                    var inputFile=event.currentTarget;
+                    $(inputFile).parent()
+                        .find('.custom-file-label')
+                        .html(inputFile.files[0].name);
+
+                })
+            </script>
+
+        {% endblock %}
+    </body>
+</html>

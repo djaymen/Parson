@@ -1,0 +1,264 @@
+{% extends 'base.html.twig' %}
+
+{% block title %} Mon Profile {% endblock %}
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/users.css') }}">
+    <link rel="stylesheet" type="text/css" href="/{{ asset('css/rating.css') }}">
+
+{% endblock %}
+
+{% block body_content %}
+
+<div class="col-lg-12 mx-auto mt-3 pt-1 bg-light">
+
+    <div class="col-lg-12 text-center align-items-center ">
+
+        <div class="col-lg-12 text-dark ">
+
+            <div class="row col-12 mb-3 courseImg d-flex flex-row">
+                <div class="col-sm-12 col-lg-4">
+                    {% set imgSrc=user.imgUrl ? asset(user.imgUrl) : asset('img/profil_default_male.png')  %}
+                    <img style="height: 220px;object-fit: cover;" class="col-lg-10 col-md-7 col-sm-10 rounded mt-4" src="{{ imgSrc }}" alt="">
+                    {% if app.user.id == user.id %}
+
+                            <form method="POST" action="{{ path('edit_user_img') }}" enctype="multipart/form-data">
+                                <div class="form-group col-12 mt-2">
+                                    <div class="custom-file col-12">
+                                        <input type="file" name="user_imgFile" id="user_imgFile" placeholder="Selectionnez une image" class="custom-file-input" />
+                                        <label for="user_imgFile"  class="custom-file-label px-0"></label>
+                                    </div>
+                                    <button type="submit" class="col-4 btn btn-outline-success mt-2">
+                                            <i class="fas fa-check-circle "></i>
+                                    </button>
+
+                                </div>
+                            </form>
+                    {% endif %}
+                </div>
+                <div class="col col-sm-12 col-lg-8 info pl-0 d-flex flex-column text-left px-0  mt-4">
+                    <div class="d-flex flex-row">
+                        <h1 class="courseTitle "> {{ user.fullName }} </h1>
+                        {% if  'ROLE_ENS' in user.roles or 'ROLE_ADMIN' in user.roles  %}
+                            <i class="fas fa-chalkboard-teacher ml-4 mt-3" style="font-size: 32px; color: #bc4ee9"></i>
+                        {% endif %}
+{#                        <img src="{{ asset('img/admin_icon.png') }}" class="sexeImg mx-3 mt-0" alt="">#}
+                    </div>
+                    <h4 class="text-muted ml-1"> {{ user.email }}</h4>
+                    <h5 class="text-muted ml-1"> Membre {{ user.createdAt|ago }}</h5>
+                    <h5 class="text-muted ml-1">
+                        <i class="fas fa-phone-square-alt" style="font-size: 1.3em;"> </i>
+                        <span id="phone_label"> {{ user.phone }}</span>
+                    </h5>
+                    <h5 class="text-muted ml-1">
+                        <i class="fas fa-map-marked-alt" style="font-size: 1.3em;"></i>
+                        <span id="addr_label"> {{ user.address }}</span>
+                    </h5>
+                    <h5 class="text-muted ml-1" style="font-size: 1.4em;">
+                        <i class="fas fa-comments" ></i>
+                        <b> {{ user.comments.count }}</b> comments
+                    </h5>
+                    {% if app.user.id == user.id %}
+                        <a class="btn btn-outline-primary btn-lg  m-3" data-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">
+                            <span> <i class="fas fa-pen"></i></span> modifier
+                        </a>
+                    {% endif %}
+
+                </div>
+            </div><!-- /.row -->
+
+            <hr>
+            <div class="ml-1 collapse " id="collapseExample">
+                <div id="result">
+                    <h5></h5>
+                </div>
+                <div class="card card-body ">
+                    {{ include('user/_user_form.html.twig',{
+                        addr:user.address,
+                        phone:user.phone,
+                        fullname:false
+                    }) }}
+                </div>
+            </div>
+            <hr>
+            <div class="row p-0">
+                {# Info Heures et nb_students #}
+                <div class="col-lg-6 col-sm-12 mx-auto my-2 d-flex flex-column text-center">
+                    <a href="">
+                        {#<img src="{{ asset('img/admin_icon.png') }}" alt="" class="sexeImg">#}
+                        <i class="fas fa-chart-line" style="font-size: 2.8rem; color:#48bfff;"></i>
+                    </a>
+                    <h5 href="#">
+                        <b>{{nbUsers}}</b>  inscrit(e)s
+                    </h5>
+                    <a href="#">
+
+                    </a>
+                    <a href="{{ path('my_marks') }}" class="text-dark">
+                        Note  moyenne  : <b>{{ average|number_format(2)}} / 20 </b>
+                    </a>
+                    <p>
+                        #Volume horaire : <b>{{ nbHours|number_format(0) }} H </b>
+                    </p>
+                </div>
+
+                {# Cours notes !#}
+                <div class="col col-lg-6 col-sm-12 mx-auto my-2 d-flex flex-column text-center">
+                    <a href="#">
+                        {#<img src="{{ asset('img/simple_icon.png') }}" class="sexeImg" alt="">#}
+                        <i class="fas fa-heart" style="color: red; font-size: 2.8em;"></i>
+                    </a>
+                    <h5 href="#" class="mb-0">
+                        Avis Moyen
+                    </h5>
+                    <b>
+                        {{ rating|number_format(1) }} / 5
+                    </b>
+                </div>
+            </div> {# END row #}
+
+
+
+            <hr>
+            {%  if is_granted('ROLE_ENS') %}
+                <h1> Cours Crées (<b>{{ user.createdCourses.count }}</b> résultats)</h1>
+                <div class="row ml-5">
+                {% if user.createdCourses.count %}
+                    {% for course in user.createdCourses %}
+                        {% set theme=random(['text-light bg-primary','text-light bg-dark','text-light bg-info',
+                            'text-light bg-danger','text-light bg-success',
+                            'text-light bg-secondary','text-dark bg-warning'])  %}
+                        <div class="card {{theme}} mb-3 mx-1" style="max-width: 18rem;">
+                            <div class="card-header">{{course.createdAt|ago }}</div>
+                            <div class="card-body text-center">
+                                <h5 class="card-title">{{ course.title|truncate(50) }}</h5>
+                                <p> <b>( {{ course.exercises.count }} exercice , {{ course.comments.count }} avis ) </b></p>
+                                <a href="{{ path('course_detail',{'id':course.id}) }}" class="btn btn-outline-{{ theme=='text-dark bg-warning' ? 'dark': 'light'}}">
+                                    Voir En Détail
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center my-4">
+                        <h2 class="text-dark mb-2"> Vous n'avez pas encore de résultats inscrivez vous pour en avoir !</h2>
+                        <a href="{{ path('courses') }}" class="btn btn-dark btn-lg mb-5"> Cours disponibles</a>
+                    </div>
+                {% endif %}
+
+                </div>{# END row #}
+            {% else %}
+                <h1> Cours Suivis (<b>{{ user.registredInCourses.count }}</b> résultats)</h1>
+                <div class="row ml-5">
+                {% if user.registredInCourses.count %}
+                    {% for course in user.registredInCourses %}
+                        {% set theme=random(['text-light bg-primary','text-light bg-dark','text-light bg-info',
+                            'text-light bg-danger','text-light bg-success',
+                            'text-light bg-secondary','text-dark bg-warning'])  %}
+                        <div class="card {{theme}} mb-3 mx-1" style="max-width: 18rem;">
+                            <div class="card-header">{{course.course.createdAt|ago }}</div>
+                            <div class="card-body text-center">
+                                <h5 class="card-title">{{ course.course.title|truncate(50) }}</h5>
+                                <p> <b>( {{ course.course.exercises.count }} exercice , {{ course.course.comments.count }} avis ) </b></p>
+                                <a href="{{ path('course_detail',{'id':course.course.id}) }}" class="btn btn-outline-{{ theme=='text-dark bg-warning' ? 'dark': 'light'}}">
+                                    Voir En Détail
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center my-4">
+                        <h2 class="text-dark mb-2"> Vous n'avez pas encore de résultats inscrivez vous pour en avoir !</h2>
+                        <a href="{{ path('courses') }}" class="btn btn-dark btn-lg mb-5"> Cours disponibles</a>
+                    </div>
+                {% endif %}
+
+                </div>{# END row #}
+            {% endif %}
+
+
+
+
+
+
+
+        </div>
+        </div>
+        </div>
+
+            {#<div class="col-lg-6 mx-auto mt-5 py-5">#}
+
+        {#<div class="col-12 text-center ">#}
+
+            {#<div class=" py-5 col-12 text-dark">#}
+                {#<h1>  Bienvenue à Profile ! {{ user.fullName }}</h1>#}
+                {#<div class="welcome">#}
+                    {#<p> Trouvez un cours qui vous va le mieux ! </p>#}
+                    {#<p> Pour Bénificier des fonctionnalités de ParSon Veuillez ... </p>#}
+                {#</div>#}
+                {#<!-- <div class="btn_">#}
+                    {#<a href="/register" class="btn"> Commencer ! </a>#}
+                {#</div> -->#}
+            {#</div>#}
+
+        {#</div>#}
+
+    {#</div>#}
+
+{% endblock %}
+
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        $(document).ready(function () {
+
+            $('#valid_edit_profil').click(function () {
+                addr_input = $('#addr_input').val();
+                phone_input=$('#phone_input').val();
+
+                $.ajax({
+                    type: "POST",
+                    url: "{{ path('edit_user_info') }}",
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8",
+                    data: JSON.stringify({"addr": addr_input,"phone":phone_input, "id":{{ user.id }} }),
+                })//done handler
+                    .done(function (data) {
+                        var msg;
+                        if (data.result) {
+                            msg=" Super ! c'est bien sauvegardé";
+                            $('#result').addClass('alert-success').removeClass('alert-danger');
+
+                            if (addr_input)
+                            {
+                                $('#addr_label').html(addr_input);
+                            }
+                            if (phone_input)
+                            {
+                                $('#phone_label').html(phone_input);
+                            }
+                        } else {
+                            msg=" Oops ! qq chose d'imprévu";
+                            $('#result').addClass('alert-danger').removeClass('alert-success');
+
+                        }
+                        $('#result h5').text(msg);
+                        $("#result").fadeIn('slow').animate({
+                            opacity: 1.0}, 2000).fadeOut('slow');
+
+                        console.log(data.d);
+                    });
+
+
+            })
+
+
+
+
+        })
+
+    </script>
+
+{% endblock %}
+

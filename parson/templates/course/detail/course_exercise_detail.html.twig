@@ -1,0 +1,371 @@
+{% extends 'base.html.twig' %}
+
+{% block title %} {{ exercise.title }} {% endblock %}
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/courses.css') }}">
+{% endblock %}
+
+{% block body_content %}
+
+    <div class="col-lg-12 mx-auto mt-3 pt-1 bg-light text-dark">
+
+        <div class="col-lg-12  ">
+
+            <div class="col-lg-12  text-dark">
+                {% if exercise.course.author.id==app.user.id %}
+                    <div class="text-center pt-4">
+                        <a href="{{ path('edit_exo',{'id':exercise.id}) }}" class="btn btn-warning btn-lg"> <span><i
+                                        class="fas fa-edit"></i></span> Modifier cet exo </a>
+                        <button class="add-solution btn btn-danger btn-lg"><span><i
+                                        class="fas fa-plus-circle"></i></span> une solution
+                        </button>
+                        <a href="{{ path('new_exo',{'id':exercise.course.id}) }}" class="btn btn-dark btn-lg"><span><i
+                                        class="fas fa-plus-circle"></i></span> un autre exo </a>
+                    </div>
+
+                {% endif %}
+                <hr>
+                <div class="row col-12 mb-3 courseImg">
+                    <img style="height: 320px;object-fit: cover;" class="col-12"
+                         src="{{ asset('img/can_robots_beat_humans.jpg') }}" alt="">
+                </div>
+
+                <div class=" row col-lg-12 col-sm-10 courseDetails mx-auto px-5 mb-5">
+                    <h1 class="courseTitle text-center"> {{ exercise.course.title }} >
+                        <h2 class="courseTitle text-center mt-2"> {{ exercise.title }} </h2></h1>
+
+                </div>
+
+                <div class="text-center row col-lg-12 col-sm-6 courseDetails  d-flex flex-row">
+
+                    {# Info Auteur #}
+                    <div class=" col col-lg-12 col-sm-6 my-2 d-flex flex-column">
+                        {% set imgSrc=exercise.course.author.imgUrl ? asset(exercise.course.author.imgUrl) : asset('img/profil_default_male.png')  %}
+                        <a href="{{ path('user_profile',{id: exercise.course.author.id}) }}">
+                            <img src="{{ imgSrc }}" class="userImg" alt="">
+                        </a>
+                        <a href="{{ path('user_profile',{id: exercise.course.author.id}) }}">
+                            {{ exercise.course.author.fullname }}
+                        </a>
+                        <a href="{{ path('user_profile',{id: exercise.course.author.id}) }}" class="text-dark">
+                            {{ exercise.course.author.email }}
+                        </a>
+                        <p>
+                            Le {{ exercise.course.createdAt|date('d/m/Y') }}
+                            à {{ exercise.course.createdAt|date('H:i') }}
+                        </p>
+                    </div>
+
+                </div>
+
+                <hr class="divider">
+                <div class="row ml-3">
+                    <h2> Question :</h2>
+                </div>
+                <div class="row col-12 ml-3">
+                    <h3> {{ exercise.question }} ?</h3>
+                </div>
+
+                <div class="row col-12 ml-3 mt-5">
+                    <div class="col-7 titre">
+                        <h3> Résoudre le probleme !</h3>
+                    </div>
+                    <div class="col-5">
+                        <div class="alert alert-success" id="already_done_solution">
+                            <h4></h4>
+                        </div>
+                    </div>
+
+                </div>
+                <hr>
+
+                <div class="alert" id="result">
+                    <h5>
+                    </h5>
+                </div>
+
+
+                <div class="row  pt-4" id="ins_div" style="background-color: rgb(41,33,35); color: #ffffff">
+                    <ul id="instructions">
+                        {% for key,instruction in exercise.solution|shuffle %}
+                            <li class="row instruction" id="{{ instruction }}">
+                                <h5 class="p-2 border border-light "> {{ instruction }} </h5>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <div class="row col-3 mx-auto my-3 pb-5">
+                    <button id="btnSubmit" class="btn btn-success w-100">Valider</button>
+                </div>
+
+                <div class="modal" tabindex="-1" role="dialog">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Proposez votre solution !</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="p-2 rounded" id="result_solution">
+                                    <h5></h5>
+                                </div>
+                                <button type="button" class="add-solution btn btn-secondary my-2"><span> <i
+                                                class="fa fa-plus"></i></span> instruction
+                                </button>
+                                {% if exercise.solution | length >0 %}
+                                    {% for ins in exercise.solution %}
+                                    <input type="text" value="{{ ins }}"
+                                           class="form-control mt-2">
+                                    {% endfor %}
+                                {% endif %}
+
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-warning" id="valid-solution">Valider</button>
+                                <button type="button" class="btn btn-dark" data-dismiss="modal">Fermer</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+
+            <!-- <div class="btn_">
+                <a href="/register" class="btn"> Commencer ! </a>
+            </div> -->
+
+        </div>
+
+    </div>
+    </div>
+
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.js"></script>
+    <script>
+        $(document).ready(function () {
+
+            $('#already_done_solution').hide();
+
+            var sortedItems = [];
+
+            $("#instructions").sortable({
+                stop: function (e, ui) {
+                    SetSortOrder();
+                },
+            });
+            $("#instructions").disableSelection();
+
+            //Init the list items on load
+            SetSortOrder();
+
+            //Set the data-order attribute to the index
+            function SetSortOrder() {
+                $("#instructions li").each(function (index, value) {
+                    $(this).data("order", index);
+                });
+            }
+
+            //AJAX
+            function SubmitData(items) {
+
+                $.ajax({
+                    type: "POST",
+                    url: "{{ path('exo_parson_submit') }}",
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8",
+                    data: JSON.stringify({"items": items, "id":{{ exercise.id }} }),
+                })//done handler
+                    .done(function (data) {
+                        var msg = data.result ? 'Bravoo ! c\'est le bon code !' : 'Ooops ! retentez !';
+                        var note= data.note;
+                        if (data.result) {
+                            $('#result').addClass('alert-success').removeClass('alert-danger');
+                            $('#already_done_solution').addClass('alert-success').removeClass('alert-danger');
+                        } else {
+                            $('#result').addClass('alert-danger').removeClass('alert-success');
+                            $('#already_done_solution').addClass('alert-danger').removeClass('alert-success');
+                        }
+                        $('#already_done_solution h4').text(note+' pts');
+                        $('#result h5').text(msg);
+                        $('#already_done_solution').show();
+                        $('#result').fadeIn('slow').animate({
+                            opacity: 1.0}, 2000).fadeOut('slow');
+
+                        console.log(data.d);
+                    });
+            }
+
+            //Get the current order state
+            function PopulateSortItems() {
+                sortedItems.length = 0;
+
+                $("#instructions li").each(function (index, value) {
+                    let item = $(this).attr("id");
+
+                    // item.id = $(this).attr("id");
+                    // item.order = $(this).data("order");
+                    sortedItems.push(item);
+                });
+
+                return sortedItems
+            }
+
+            //For debugging
+            $('#btnSubmit').click(function () {
+                var items = PopulateSortItems();
+                SubmitData(items);
+            });
+
+
+            $('.add-solution').click(function (e) {
+                var list = $('.modal-body');
+                $('.modal').modal();
+
+
+                newInstruction = "<input type=\"text\" placeholder=\"à vous...\"\n" +
+                    "  class=\"form-control mt-2\">";
+
+                // var solutionList=$('#solution-list');
+                // var li= "<li class='my-1'>"+newInstruction.select(input)+" </li>";
+                // solutionList.append(li);
+
+                list.append(newInstruction);
+                // console.log(list);
+
+            });
+            let instructions = [];
+            /**
+             * Shuffles array in place.
+             * @param {Array} a items An array containing the items.
+             */
+            function shuffle(a) {
+                var j, x, i;
+                for (i = a.length - 1; i > 0; i--) {
+                    j = Math.floor(Math.random() * (i + 1));
+                    x = a[i];
+                    a[i] = a[j];
+                    a[j] = x;
+                }
+                return a;
+            }
+            $('#valid-solution').click(function (e) {
+                var list = $('.modal-body input:text').each(function (instruction) {
+                    if ($(this).val())
+                    {
+                        instructions.push($(this).val().toString());
+                    }
+                })
+                $.ajax({
+                    type: "POST",
+                    url: "{{ path('exo_add_sol') }}",
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8",
+                    data: JSON.stringify({"solution": instructions, "id":{{ exercise.id }} }),
+                })//done handler
+                    .done(function (data) {
+                        let msg="";
+                        if (data.result) {
+                            msg=" Super ! c'est bien sauvegardé";
+                            $('#result_solution').addClass('alert-success').removeClass('alert-danger');
+                        } else {
+                            msg=" Oops ! qq chose d'imprévu";
+                            $('#result_solution').addClass('alert-danger').removeClass('alert-success');
+
+                        }
+                        $('#result_solution h5').text(msg);
+                        $("#result_solution").fadeIn('slow').animate({
+                            opacity: 1.0}, 2000).fadeOut('slow');
+                        li="";
+                        instructions=shuffle(instructions);
+
+                        for (let ins of instructions)
+                        {
+                            li+="                            <li class=\"row instruction\" id=\""+ins+"\">\n" +
+                                "                                <h5 class=\"p-2 border border-light \">"+ins+" </h5>\n" +
+                                "                            </li>\n";
+                        }
+                        ins_div="<ul id=\"instructions\">\n" +li+
+                            "</ul>"
+                        $('#ins_div').html(ins_div);
+                        $("#instructions").sortable({
+                            stop: function (e, ui) {
+                                SetSortOrder();
+                            },
+                        });
+                        setTimeout(function() {
+                            $('.modal').modal('hide');
+                        }, 2500);
+
+                        // $("#result_solution").show();
+                        // setTimeout(function() { $("#result_solution").hide(); }, 2000);
+                    });
+
+            })
+
+
+            // $('#instructions').sortable({
+            //     stop:function(event, ui){
+            //         var element_dd = ui.item[0].attributes.element.value,
+            //             position = ui.item.index(),
+            //             link = base_url+'/update/post/'+element_dd;
+            //         $.ajax({
+            //             type:"POST",
+            //             url:link,
+            //             data:{
+            //                 'position':position
+            //             },
+            //             success:function(result){
+            //                 console.log(result);
+            //             },
+            //             error:function(error){
+            //
+            //             }
+            //         });
+            //     }
+            // });
+
+            {#$(function () {#}
+            {#    $("#instructions").sortable({#}
+            {#        update: function (event, ui) {#}
+            {#            var order = $("#instructions").sortable("serialize", {#}
+            {#                attribute: "id"#}
+            {#            });#}
+
+            {#            $(document).on("click", "button", function () { //that doesn't work#}
+            {#                $.ajax({#}
+            {#                    data: order,#}
+            {#                    type: 'POST',#}
+            {#                    dataType:json,#}
+            {#                    url: "{{ path('exo_parson_submit') }}"#}
+            {#                });#}
+            {#            });#}
+
+            {#        }#}
+            {#    }).disableSelection();#}
+            {#    $('button').on('click', function () {#}
+            {#        var r = $("#instructions").sortable("toArray");#}
+            {#        var a = $("#instructions").sortable("serialize", {#}
+            {#            attribute: "id"#}
+            {#        });#}
+            {#        #}{#$.ajax(#}{#}#}
+            {#        #}{#    data: r,#}
+            {#        #}{#    type: 'POST',#}
+            {#        #}{#    url: "{{ path('exo_parson_submit') }}"#}
+            {#        #}{#});#}
+            {#        console.log(r);#}
+            {#    });#}
+            {#});#}
+
+        });
+
+    </script>
+{% endblock %}
+

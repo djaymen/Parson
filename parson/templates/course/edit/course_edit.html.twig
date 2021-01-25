@@ -1,0 +1,20 @@
+{% extends 'base.html.twig' %}
+
+{% block title %} Modifier un Cours {% endblock %}
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('css/courses.css') }}">
+{% endblock %}
+
+{% block body_content %}
+
+    {{  include('course/_form.html.twig',{
+        title_text: 'Le voila votre cours !',
+        btn_text :  'Valider'
+    }) }}
+
+
+
+
+
+{% endblock %}

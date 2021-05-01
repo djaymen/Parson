@@ -3,8 +3,8 @@
 ## Réalisé Par :
   |   Nom & Prénoms |N_Etudiant| ID_Gitlab | Groupe |
 |----------------|-------------------------------|-----------------------------|-------|
-|Djelid Aymen | `-- XXX --` | `djelid` |  Info4 |
-|Benamara Abdelkader Chihab | `-- XXX --` | `benamara` |    Maths-Info     
+|Djelid Aymen | `-- XX --` | `Djelid` |  Info4 |
+|Benamara Abdelkader Chihab | `-- XX --` | `Benamara` |    Maths-Info     
 
 
 
